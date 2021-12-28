@@ -23,7 +23,7 @@ class REST {
     private static let configuration: URLSessionConfiguration = {
         let config = URLSessionConfiguration.default
         config.allowsCellularAccess = false //bloquear 3g ou 4g - somente wifi
-        config.httpAdditionalHeaders = ["Content-Type:": "application/json"] //Header HTTP
+        config.httpAdditionalHeaders = ["Content-Type": "application/json"] //Header HTTP
         config.timeoutIntervalForRequest = 30.0 //TIMEOUT DEFINIDO POR CLIENTE, CASO EM 30 SEGUNDOS ELE CANCELA
         config.httpMaximumConnectionsPerHost = 5
         return config
@@ -66,6 +66,36 @@ class REST {
 
             }else {
                 onError(.taskError(error: error!))
+            }
+        }
+        
+        dataTask.resume()
+    }
+    
+    class func save(car: Car, onComplete: @escaping (Bool) -> Void){
+        guard let url = URL(string: basePath) else {
+            onComplete(false)
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        guard let json = try? JSONEncoder().encode(car) else {
+            onComplete(false)
+            return
+        }
+        print(json)
+        request.httpBody = json
+        
+        let dataTask = session.dataTask(with: request) { data, response, error in
+            if error == nil {
+                guard let response = response as? HTTPURLResponse, response.statusCode == 200, let _ = data else {
+                    onComplete(false)
+                    return
+                }
+                onComplete(true)
+            }else {
+                onComplete(false)
             }
         }
         
