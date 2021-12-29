@@ -26,3 +26,7 @@ class Car: Codable {
         }
     }
 }
+
+struct Brand: Codable {
+    var nome: String = ""
+}
